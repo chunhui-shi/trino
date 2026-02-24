@@ -30,6 +30,7 @@ import static java.util.concurrent.TimeUnit.MINUTES;
 @DefunctConfig("oracle.disable-automatic-fetch-size")
 public class OracleConfig
 {
+    private OracleAuthenticationType authenticationType = OracleAuthenticationType.PASSWORD;
     private boolean synonymsEnabled;
     private boolean remarksReportingEnabled;
     private Integer defaultNumberScale;
@@ -39,6 +40,20 @@ public class OracleConfig
     private int connectionPoolMaxSize = 30;
     private Duration inactiveConnectionTimeout = new Duration(20, MINUTES);
     private Integer fetchSize;
+
+    @NotNull
+    public OracleAuthenticationType getAuthenticationType()
+    {
+        return authenticationType;
+    }
+
+    @Config("oracle.authentication.type")
+    @ConfigDescription("Authentication type to use when connecting to Oracle. KERBEROS requires oracle.connection-pool.enabled=false.")
+    public OracleConfig setAuthenticationType(OracleAuthenticationType authenticationType)
+    {
+        this.authenticationType = authenticationType;
+        return this;
+    }
 
     public boolean isSynonymsEnabled()
     {

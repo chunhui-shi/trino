@@ -35,6 +35,7 @@ public class TestOracleConfig
     public void testDefaults()
     {
         assertRecordedDefaults(recordDefaults(OracleConfig.class)
+                .setAuthenticationType(OracleAuthenticationType.PASSWORD)
                 .setSynonymsEnabled(false)
                 .setRemarksReportingEnabled(false)
                 .setDefaultNumberScale(null)
@@ -50,6 +51,7 @@ public class TestOracleConfig
     public void testExplicitPropertyMappings()
     {
         Map<String, String> properties = ImmutableMap.<String, String>builder()
+                .put("oracle.authentication.type", "KERBEROS")
                 .put("oracle.synonyms.enabled", "true")
                 .put("oracle.remarks-reporting.enabled", "true")
                 .put("oracle.number.default-scale", "2")
@@ -62,6 +64,7 @@ public class TestOracleConfig
                 .buildOrThrow();
 
         OracleConfig expected = new OracleConfig()
+                .setAuthenticationType(OracleAuthenticationType.KERBEROS)
                 .setSynonymsEnabled(true)
                 .setRemarksReportingEnabled(true)
                 .setDefaultNumberScale(2)
