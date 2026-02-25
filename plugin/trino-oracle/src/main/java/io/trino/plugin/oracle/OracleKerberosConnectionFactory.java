@@ -106,13 +106,15 @@ public class OracleKerberosConnectionFactory
         catch (Exception e) {
             // Subject.callAs() declares `throws Exception`, so we must catch Exception
             // and re-throw the specific exception types if that is what was thrown.
-            if (e instanceof SQLException sqlException) {
+            // Oracle JDBC may also wrap SQLExceptions in CompletionException internally.
+            Throwable cause = (e instanceof java.util.concurrent.CompletionException && e.getCause() != null) ? e.getCause() : e;
+            if (cause instanceof SQLException sqlException) {
                 throw sqlException;
             }
-            if (e instanceof TrinoException trinoException) {
-                throw trinoException;
+            if (cause instanceof RuntimeException runtimeException) {
+                throw runtimeException;
             }
-            throw new RuntimeException("Failed to open Oracle Kerberos connection", e);
+            throw new RuntimeException("Failed to open Oracle Kerberos connection", cause);
         }
     }
 
