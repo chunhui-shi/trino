@@ -15,6 +15,7 @@ package io.trino.plugin.jdbc.kerberos;
 
 import io.airlift.configuration.Config;
 import io.airlift.configuration.ConfigDescription;
+import io.airlift.configuration.ConfigSecuritySensitive;
 import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotNull;
@@ -29,6 +30,10 @@ public class KerberosConfig
     private String clientKeytab;
     @Nullable
     private String clientCredentialCacheLocation;
+    @Nullable
+    private String clientKeytabBase64;
+    @Nullable
+    private String clientKrb5ConfigBase64;
 
     @NotNull
     public String getClientPrincipal()
@@ -70,9 +75,54 @@ public class KerberosConfig
         return this;
     }
 
-    @AssertTrue(message = "Exactly one of `kerberos.client.keytab` or `kerberos.client.credential-cache.location` must be specified")
+    public Optional<String> getClientKeytabBase64()
+    {
+        return Optional.ofNullable(clientKeytabBase64);
+    }
+
+    @Config("kerberos.client.keytab-base64")
+    @ConfigDescription("Base64-encoded Kerberos keytab content. Use ${ENV:VAR} to reference an " +
+            "environment variable or a secrets-manager provider. When set, Apache Kerby is used " +
+            "for authentication. Mutually exclusive with kerberos.client.keytab.")
+    @ConfigSecuritySensitive
+    public KerberosConfig setClientKeytabBase64(String clientKeytabBase64)
+    {
+        this.clientKeytabBase64 = clientKeytabBase64;
+        return this;
+    }
+
+    public Optional<String> getClientKrb5ConfigBase64()
+    {
+        return Optional.ofNullable(clientKrb5ConfigBase64);
+    }
+
+    @Config("kerberos.client.krb5-config-base64")
+    @ConfigDescription("Optional base64-encoded Kerberos configuration (krb5.conf) content for use " +
+            "with kerberos.client.keytab-base64. When absent, Kerby reads the file referenced by " +
+            "the java.security.krb5.conf JVM system property.")
+    public KerberosConfig setClientKrb5ConfigBase64(String clientKrb5ConfigBase64)
+    {
+        this.clientKrb5ConfigBase64 = clientKrb5ConfigBase64;
+        return this;
+    }
+
+    @AssertTrue(message = "Exactly one keytab source must be specified: " +
+            "kerberos.client.keytab (file path), kerberos.client.keytab-base64 (in-memory), " +
+            "or kerberos.client.credential-cache.location")
     public boolean isAuthSourceValid()
     {
-        return getClientKeytab().isPresent() ^ getClientCredentialCacheLocation().isPresent();
+        long keytabSources = countPresent(getClientKeytab(), getClientKeytabBase64(), getClientCredentialCacheLocation());
+        return keytabSources == 1;
+    }
+
+    private static long countPresent(Optional<?>... optionals)
+    {
+        long count = 0;
+        for (Optional<?> opt : optionals) {
+            if (opt.isPresent()) {
+                count++;
+            }
+        }
+        return count;
     }
 }

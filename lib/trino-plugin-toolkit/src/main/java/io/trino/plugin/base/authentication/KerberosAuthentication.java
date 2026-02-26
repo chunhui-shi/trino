@@ -26,6 +26,7 @@ import static java.util.Collections.emptySet;
 import static java.util.Objects.requireNonNull;
 
 public class KerberosAuthentication
+        implements KerberosAuthenticationProvider
 {
     private static final Logger log = Logger.get(KerberosAuthentication.class);
 

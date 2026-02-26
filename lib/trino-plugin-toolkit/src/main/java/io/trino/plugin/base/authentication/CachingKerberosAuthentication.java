@@ -23,7 +23,7 @@ import static java.util.Objects.requireNonNull;
 
 public class CachingKerberosAuthentication
 {
-    private final KerberosAuthentication kerberosAuthentication;
+    private final KerberosAuthenticationProvider kerberosAuthentication;
 
     @GuardedBy("this")
     private Subject subject;
@@ -31,7 +31,7 @@ public class CachingKerberosAuthentication
     @GuardedBy("this")
     private long nextRefreshTime;
 
-    public CachingKerberosAuthentication(KerberosAuthentication kerberosAuthentication)
+    public CachingKerberosAuthentication(KerberosAuthenticationProvider kerberosAuthentication)
     {
         this.kerberosAuthentication = requireNonNull(kerberosAuthentication, "kerberosAuthentication is null");
     }
