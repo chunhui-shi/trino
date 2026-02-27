@@ -21,6 +21,8 @@ import java.util.Map;
 import static io.airlift.configuration.testing.ConfigAssertions.assertFullMapping;
 import static io.airlift.configuration.testing.ConfigAssertions.assertRecordedDefaults;
 import static io.airlift.configuration.testing.ConfigAssertions.recordDefaults;
+import static io.trino.plugin.jdbc.JdbcAuthenticationType.KERBEROS;
+import static io.trino.plugin.jdbc.JdbcAuthenticationType.PASSWORD;
 
 public class TestPostgreSqlConfig
 {
@@ -28,6 +30,7 @@ public class TestPostgreSqlConfig
     public void testDefaults()
     {
         assertRecordedDefaults(recordDefaults(PostgreSqlConfig.class)
+                .setAuthenticationType(PASSWORD)
                 .setArrayMapping(PostgreSqlConfig.ArrayMapping.DISABLED)
                 .setIncludeSystemTables(false)
                 .setEnableStringPushdownWithCollate(false)
@@ -38,6 +41,7 @@ public class TestPostgreSqlConfig
     public void testExplicitPropertyMappings()
     {
         Map<String, String> properties = ImmutableMap.<String, String>builder()
+                .put("postgresql.authentication.type", "KERBEROS")
                 .put("postgresql.array-mapping", "AS_ARRAY")
                 .put("postgresql.include-system-tables", "true")
                 .put("postgresql.experimental.enable-string-pushdown-with-collate", "true")
@@ -45,6 +49,7 @@ public class TestPostgreSqlConfig
                 .buildOrThrow();
 
         PostgreSqlConfig expected = new PostgreSqlConfig()
+                .setAuthenticationType(KERBEROS)
                 .setArrayMapping(PostgreSqlConfig.ArrayMapping.AS_ARRAY)
                 .setIncludeSystemTables(true)
                 .setEnableStringPushdownWithCollate(true)

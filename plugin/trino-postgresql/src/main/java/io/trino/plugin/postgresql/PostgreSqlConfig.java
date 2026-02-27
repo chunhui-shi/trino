@@ -17,14 +17,18 @@ import io.airlift.configuration.Config;
 import io.airlift.configuration.ConfigDescription;
 import io.airlift.configuration.DefunctConfig;
 import io.airlift.configuration.LegacyConfig;
+import io.trino.plugin.jdbc.JdbcAuthenticationType;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 
 import java.util.Optional;
 
+import static io.trino.plugin.jdbc.JdbcAuthenticationType.PASSWORD;
+
 @DefunctConfig("postgresql.disable-automatic-fetch-size")
 public class PostgreSqlConfig
 {
+    private JdbcAuthenticationType authenticationType = PASSWORD;
     private ArrayMapping arrayMapping = ArrayMapping.DISABLED;
     private boolean includeSystemTables;
     private boolean enableStringPushdownWithCollate;
@@ -35,6 +39,20 @@ public class PostgreSqlConfig
         DISABLED,
         AS_ARRAY,
         AS_JSON,
+    }
+
+    @NotNull
+    public JdbcAuthenticationType getAuthenticationType()
+    {
+        return authenticationType;
+    }
+
+    @Config("postgresql.authentication.type")
+    @ConfigDescription("Authentication type to use when connecting to PostgreSQL.")
+    public PostgreSqlConfig setAuthenticationType(JdbcAuthenticationType authenticationType)
+    {
+        this.authenticationType = authenticationType;
+        return this;
     }
 
     @NotNull

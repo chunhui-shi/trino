@@ -17,6 +17,11 @@ import com.google.common.collect.ImmutableMap;
 import io.trino.spi.Plugin;
 import io.trino.spi.connector.ConnectorFactory;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 import static com.google.common.collect.Iterables.getOnlyElement;
 
@@ -32,6 +37,49 @@ public class TestPostgreSqlPlugin
                 ImmutableMap.of(
                         "connection-url", "jdbc:postgresql:test",
                         "bootstrap.quiet", "true"),
+                new TestingPostgreSqlConnectorContext()).shutdown();
+    }
+
+    @Test
+    public void testCreateConnectorWithKerberosKeytab(@TempDir Path tempDir)
+            throws IOException
+    {
+        // The keytab file must exist for KerberosConfiguration.Builder.verifyFile() check,
+        // but need not be a real keytab — actual Kerberos login is lazy (on first openConnection).
+        Path keytab = Files.createFile(tempDir.resolve("test.keytab"));
+
+        Plugin plugin = new PostgreSqlPlugin();
+        ConnectorFactory factory = getOnlyElement(plugin.getConnectorFactories());
+        factory.create(
+                "test",
+                ImmutableMap.<String, String>builder()
+                        .put("connection-url", "jdbc:postgresql:test")
+                        .put("postgresql.authentication.type", "KERBEROS")
+                        .put("kerberos.client.principal", "trino@EXAMPLE.COM")
+                        .put("kerberos.client.keytab", keytab.toAbsolutePath().toString())
+                        .put("bootstrap.quiet", "true")
+                        .buildOrThrow(),
+                new TestingPostgreSqlConnectorContext()).shutdown();
+    }
+
+    @Test
+    public void testCreateConnectorWithKerberosKeytabBase64()
+    {
+        // A minimal valid base64 string; the keytab bytes are not parsed until the first
+        // connection attempt, so any non-empty base64 value works for module-binding tests.
+        String dummyKeytabBase64 = "AAAA";
+
+        Plugin plugin = new PostgreSqlPlugin();
+        ConnectorFactory factory = getOnlyElement(plugin.getConnectorFactories());
+        factory.create(
+                "test",
+                ImmutableMap.<String, String>builder()
+                        .put("connection-url", "jdbc:postgresql:test")
+                        .put("postgresql.authentication.type", "KERBEROS")
+                        .put("kerberos.client.principal", "trino@EXAMPLE.COM")
+                        .put("kerberos.client.keytab-base64", dummyKeytabBase64)
+                        .put("bootstrap.quiet", "true")
+                        .buildOrThrow(),
                 new TestingPostgreSqlConnectorContext()).shutdown();
     }
 }

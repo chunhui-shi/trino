@@ -11,23 +11,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.trino.plugin.oracle;
+package io.trino.plugin.jdbc;
 
-public enum OracleAuthenticationType
+public enum JdbcAuthenticationType
 {
-    /**
-     * Standard username/password authentication via the configured
-     * {@code connection-user} and {@code connection-password} (or other
-     * credential provider types).
-     */
+    /** Standard username/password authentication via the configured credential provider. */
     PASSWORD,
 
     /**
      * Kerberos authentication using a service keytab or credential cache.
      * Requires {@code kerberos.client.principal} and exactly one of
-     * {@code kerberos.client.keytab} or
+     * {@code kerberos.client.keytab}, {@code kerberos.client.keytab-base64}, or
      * {@code kerberos.client.credential-cache.location}.
-     * Connection pooling must be disabled ({@code oracle.connection-pool.enabled=false}).
      */
     KERBEROS,
 }

@@ -26,6 +26,8 @@ import static io.airlift.configuration.testing.ConfigAssertions.assertFullMappin
 import static io.airlift.configuration.testing.ConfigAssertions.assertRecordedDefaults;
 import static io.airlift.configuration.testing.ConfigAssertions.recordDefaults;
 import static io.airlift.testing.ValidationAssertions.assertFailsValidation;
+import static io.trino.plugin.jdbc.JdbcAuthenticationType.KERBEROS;
+import static io.trino.plugin.jdbc.JdbcAuthenticationType.PASSWORD;
 import static java.util.concurrent.TimeUnit.MINUTES;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
@@ -35,7 +37,7 @@ public class TestOracleConfig
     public void testDefaults()
     {
         assertRecordedDefaults(recordDefaults(OracleConfig.class)
-                .setAuthenticationType(OracleAuthenticationType.PASSWORD)
+                .setAuthenticationType(PASSWORD)
                 .setSynonymsEnabled(false)
                 .setRemarksReportingEnabled(false)
                 .setDefaultNumberScale(null)
@@ -64,7 +66,7 @@ public class TestOracleConfig
                 .buildOrThrow();
 
         OracleConfig expected = new OracleConfig()
-                .setAuthenticationType(OracleAuthenticationType.KERBEROS)
+                .setAuthenticationType(KERBEROS)
                 .setSynonymsEnabled(true)
                 .setRemarksReportingEnabled(true)
                 .setDefaultNumberScale(2)
