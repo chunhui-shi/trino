@@ -19,12 +19,7 @@ import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import io.trino.plugin.base.authentication.CachingKerberosAuthentication;
 import io.trino.plugin.base.authentication.KerberosAuthentication;
-import io.trino.plugin.base.authentication.KerberosAuthenticationProvider;
 import io.trino.plugin.base.authentication.KerberosConfiguration;
-import io.trino.plugin.base.authentication.KerbyKerberosAuthentication;
-
-import java.nio.charset.StandardCharsets;
-import java.util.Base64;
 
 import static io.airlift.configuration.ConfigBinder.configBinder;
 
@@ -39,14 +34,9 @@ import static io.airlift.configuration.ConfigBinder.configBinder;
  * connector-specific factory for drivers like Oracle that need an explicit
  * {@code GSSCredential}).
  *
- * <p>When {@code kerberos.client.keytab-base64} is present in the connector
- * properties, {@link KerbyKerberosAuthentication} is used: the keytab is
- * decoded from base64 and the KDC configuration is read from the
- * {@code kerberos.client.krb5-config} string, with no files on disk and no
- * JVM-global {@code java.security.krb5.conf} system property required.
- *
- * <p>Otherwise the standard JAAS {@link KerberosAuthentication} is used,
- * preserving backwards compatibility.
+ * <p>Uses the standard JAAS {@link KerberosAuthentication} with
+ * {@code Krb5LoginModule}, reading the keytab from a file path and
+ * discovering the KDC via the JVM {@code java.security.krb5.conf} property.
  */
 public class KerberosAuthenticationModule
         implements Module
@@ -61,25 +51,10 @@ public class KerberosAuthenticationModule
     @Singleton
     public CachingKerberosAuthentication cachingKerberosAuthentication(KerberosConfig config)
     {
-        KerberosAuthenticationProvider provider;
-        if (config.getClientKeytabBase64().isPresent()) {
-            // Kerby path: keytab is loaded from base64 in-memory; no keytab file on disk needed.
-            // krb5-config-base64 is optional: when absent Kerby falls back to the file
-            // referenced by the java.security.krb5.conf JVM system property.
-            byte[] keytabBytes = Base64.getDecoder().decode(config.getClientKeytabBase64().get());
-            String krb5Config = config.getClientKrb5ConfigBase64()
-                    .map(b64 -> new String(Base64.getDecoder().decode(b64), StandardCharsets.UTF_8))
-                    .orElse(null);
-            provider = new KerbyKerberosAuthentication(config.getClientPrincipal(), keytabBytes, krb5Config);
-        }
-        else {
-            // Standard JAAS / Krb5LoginModule path — unchanged behaviour.
-            KerberosConfiguration.Builder builder = new KerberosConfiguration.Builder()
-                    .withKerberosPrincipal(config.getClientPrincipal());
-            config.getClientKeytab().ifPresent(builder::withKeytabLocation);
-            config.getClientCredentialCacheLocation().ifPresent(builder::withCredentialCacheLocation);
-            provider = new KerberosAuthentication(builder.build());
-        }
-        return new CachingKerberosAuthentication(provider);
+        KerberosConfiguration.Builder builder = new KerberosConfiguration.Builder()
+                .withKerberosPrincipal(config.getClientPrincipal());
+        config.getClientKeytab().ifPresent(builder::withKeytabLocation);
+        config.getClientCredentialCacheLocation().ifPresent(builder::withCredentialCacheLocation);
+        return new CachingKerberosAuthentication(new KerberosAuthentication(builder.build()));
     }
 }

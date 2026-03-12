@@ -114,37 +114,6 @@
         </dependency>
 
         <dependency>
-            <groupId>org.apache.kerby</groupId>
-            <artifactId>kerb-client</artifactId>
-            <version>2.1.2-SNAPSHOT</version>
-            <exclusions>
-                <!-- Exclude Kerby's older commons-io; Trino's managed version is used. -->
-                <exclusion>
-                    <groupId>commons-io</groupId>
-                    <artifactId>commons-io</artifactId>
-                </exclusion>
-                <!-- token-provider pulls in nimbus-jose-jwt at a version newer than
-                     Trino's managed version; JWT token auth is not used here. -->
-                <exclusion>
-                    <groupId>org.apache.kerby</groupId>
-                    <artifactId>token-provider</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.kerby</groupId>
-            <artifactId>kerb-core</artifactId>
-            <version>2.1.2-SNAPSHOT</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.kerby</groupId>
-            <artifactId>kerb-util</artifactId>
-            <version>2.1.2-SNAPSHOT</version>
-        </dependency>
-
-        <dependency>
             <groupId>org.gaul</groupId>
             <artifactId>modernizer-maven-annotations</artifactId>
         </dependency>

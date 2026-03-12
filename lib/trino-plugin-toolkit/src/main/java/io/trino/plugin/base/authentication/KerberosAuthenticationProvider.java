@@ -19,18 +19,10 @@ import javax.security.auth.Subject;
  * Strategy interface for obtaining and refreshing a Kerberos {@link Subject}.
  *
  * <p>Implementations are responsible for performing the initial Kerberos login
- * and for re-authenticating when the TGT approaches expiry. Two implementations
- * are provided:
- * <ul>
- *   <li>{@link KerberosAuthentication} – uses the standard JAAS
- *       {@code Krb5LoginModule}, reading the keytab from a file path and
- *       discovering the KDC via the JVM-global
- *       {@code java.security.krb5.conf} system property.</li>
- *   <li>{@code KerbyKerberosAuthentication} – uses Apache Kerby to perform
- *       the AS exchange entirely in-memory, accepting the keytab as raw bytes
- *       and the KDC configuration as a string, without requiring any files on
- *       disk or the global JVM system property.</li>
- * </ul>
+ * and for re-authenticating when the TGT approaches expiry.
+ * {@link KerberosAuthentication} uses the standard JAAS
+ * {@code Krb5LoginModule}, reading the keytab from a file path and
+ * discovering the KDC via the JVM {@code java.security.krb5.conf} property.
  *
  * <p>Implementations are wrapped by {@link CachingKerberosAuthentication},
  * which caches the subject and triggers renewal before the TGT expires.

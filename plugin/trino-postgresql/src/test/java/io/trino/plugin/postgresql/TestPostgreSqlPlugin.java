@@ -61,25 +61,4 @@ public class TestPostgreSqlPlugin
                         .buildOrThrow(),
                 new TestingPostgreSqlConnectorContext()).shutdown();
     }
-
-    @Test
-    public void testCreateConnectorWithKerberosKeytabBase64()
-    {
-        // A minimal valid base64 string; the keytab bytes are not parsed until the first
-        // connection attempt, so any non-empty base64 value works for module-binding tests.
-        String dummyKeytabBase64 = "AAAA";
-
-        Plugin plugin = new PostgreSqlPlugin();
-        ConnectorFactory factory = getOnlyElement(plugin.getConnectorFactories());
-        factory.create(
-                "test",
-                ImmutableMap.<String, String>builder()
-                        .put("connection-url", "jdbc:postgresql:test")
-                        .put("postgresql.authentication.type", "KERBEROS")
-                        .put("kerberos.client.principal", "trino@EXAMPLE.COM")
-                        .put("kerberos.client.keytab-base64", dummyKeytabBase64)
-                        .put("bootstrap.quiet", "true")
-                        .buildOrThrow(),
-                new TestingPostgreSqlConnectorContext()).shutdown();
-    }
 }
